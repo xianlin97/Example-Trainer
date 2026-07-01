@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>EgTrainer</title>
     <link rel="stylesheet" href="./styles.css" />
+    <script async src="https://tally.so/widgets/embed.js"></script>
   </head>
   <body>
     <section class="gallery-view" id="galleryView">
@@ -20,6 +21,18 @@
           <h1>选择例句库</h1>
         </div>
         <div class="gallery-header-side gallery-header-actions">
+          <button class="icon-action-button gallery-soft-action" id="galleryHelpBtn" type="button" title="使用帮助" aria-label="使用帮助">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9.1 9a3 3 0 1 1 4.9 2.3c-.9.6-1.7 1.2-1.7 2.4"></path>
+              <path d="M12 17.8h.01"></path>
+              <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"></path>
+            </svg>
+          </button>
+          <button class="icon-action-button gallery-soft-action" id="galleryFeedbackBtn" type="button" title="用户反馈" aria-label="用户反馈" data-tally-open="kdpXEo" data-tally-layout="modal" data-tally-hide-title="1" data-tally-auto-close="1000">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+            </svg>
+          </button>
           <button class="icon-action-button" id="gallerySettingsBtn" type="button" title="设置" aria-label="设置">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"></path>
@@ -31,7 +44,7 @@
 
       <div class="gallery-tools">
         <input class="gallery-search" id="gallerySearch" type="search" placeholder="搜索词典" />
-        <button class="secondary-button" id="galleryImportBtn" type="button">导入本地词典</button>
+        <button class="secondary-button" id="galleryImportBtn" type="button">导入例句库</button>
       </div>
 
       <div class="dictionary-gallery" id="dictionaryGallery" aria-label="词典库"></div>
@@ -285,6 +298,19 @@
         </div>
         <div class="settings-status" id="settingsStatus"></div>
       </form>
+    </dialog>
+
+    <dialog class="help-dialog" id="helpDialog">
+      <div class="help-panel">
+        <div class="dialog-head">
+          <div>
+            <h2>使用帮助</h2>
+            <p>扫码加入微信群，反馈问题或参与内测。</p>
+          </div>
+          <button class="icon-button" id="closeHelpBtn" type="button" aria-label="关闭使用帮助">×</button>
+        </div>
+        <img class="wechat-group-image" src="./docs/WeChat_Group.png" alt="微信群二维码" />
+      </div>
     </dialog>
 
     <dialog class="parts-dialog" id="partsDialog">

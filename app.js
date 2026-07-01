@@ -51,6 +51,7 @@ const els = {
   gallerySearch: document.getElementById("gallerySearch"),
   dictionaryGallery: document.getElementById("dictionaryGallery"),
   galleryImportBtn: document.getElementById("galleryImportBtn"),
+  galleryHelpBtn: document.getElementById("galleryHelpBtn"),
   gallerySettingsBtn: document.getElementById("gallerySettingsBtn"),
   galleryReturnStudyBtn: document.getElementById("galleryReturnStudyBtn"),
   appShell: document.querySelector(".app-shell"),
@@ -130,6 +131,8 @@ const els = {
   saveSettingsBtn: document.getElementById("saveSettingsBtn"),
   testAiBtn: document.getElementById("testAiBtn"),
   settingsStatus: document.getElementById("settingsStatus"),
+  helpDialog: document.getElementById("helpDialog"),
+  closeHelpBtn: document.getElementById("closeHelpBtn"),
   partsDialog: document.getElementById("partsDialog"),
   partsTitle: document.getElementById("partsTitle"),
   partsSummary: document.getElementById("partsSummary"),
@@ -874,6 +877,8 @@ function wireEvents() {
   els.gallerySearch.addEventListener("input", renderGallery);
   els.galleryImportBtn.addEventListener("click", () => els.dictionaryFileInput.click());
   els.galleryReturnStudyBtn.addEventListener("click", returnToStudyFromGallery);
+  els.galleryHelpBtn.addEventListener("click", () => els.helpDialog.showModal());
+  els.closeHelpBtn.addEventListener("click", () => els.helpDialog.close());
   els.gallerySettingsBtn.addEventListener("click", () => {
     hydrateSettingsForm();
     els.settingsDialog.showModal();

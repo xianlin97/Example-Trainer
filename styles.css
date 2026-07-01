@@ -45,7 +45,7 @@ button {
 
 .gallery-header {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  grid-template-columns: 126px minmax(0, 1fr) 126px;
   align-items: center;
   gap: 16px;
   width: min(1080px, 100%);
@@ -60,6 +60,7 @@ button {
 
 .gallery-header-actions {
   justify-content: flex-end;
+  gap: 6px;
 }
 
 .gallery-title-block {
@@ -891,6 +892,21 @@ textarea {
   stroke-linejoin: round;
 }
 
+.gallery-soft-action {
+  border-color: transparent;
+  color: var(--grey-6);
+  background: transparent;
+  opacity: 0.42;
+  transition: color 140ms ease, opacity 140ms ease, background 140ms ease;
+}
+
+.gallery-soft-action:hover,
+.gallery-soft-action:focus-visible {
+  color: var(--color-blue);
+  background: rgb(255 255 255 / 72%);
+  opacity: 0.92;
+}
+
 .primary-icon-action {
   border-color: var(--color-blue);
   color: white;
@@ -937,7 +953,8 @@ textarea {
 }
 
 .settings-dialog,
-.parts-dialog {
+.parts-dialog,
+.help-dialog {
   width: min(720px, calc(100vw - 28px));
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -945,7 +962,8 @@ textarea {
 }
 
 .settings-dialog::backdrop,
-.parts-dialog::backdrop {
+.parts-dialog::backdrop,
+.help-dialog::backdrop {
   background: rgb(0 0 0 / 28%);
 }
 
@@ -956,6 +974,23 @@ textarea {
 .parts-panel {
   padding: 22px;
   background: white;
+}
+
+.help-dialog {
+  width: min(420px, calc(100vw - 28px));
+}
+
+.help-panel {
+  padding: 22px;
+  background: white;
+}
+
+.wechat-group-image {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  margin: 12px auto 0;
+  border-radius: 8px;
 }
 
 .dialog-head {
@@ -1126,8 +1161,56 @@ textarea {
   }
 
   .gallery-header {
-    grid-template-columns: 40px minmax(0, 1fr) 40px;
-    gap: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    position: relative;
+  }
+
+  .gallery-header > .gallery-header-side:first-child {
+    position: absolute;
+    left: 0;
+  }
+
+  .gallery-header-actions {
+    position: absolute;
+    right: 0;
+  }
+
+  .gallery-header h1 {
+    font-size: 32px;
+    white-space: nowrap;
+  }
+
+  .gallery-header-actions {
+    gap: 4px;
+  }
+
+  .gallery-header .icon-action-button {
+    width: 38px;
+    min-height: 38px;
+  }
+
+  .gallery-header .icon-action-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  @media (max-width: 360px) {
+    .gallery-header h1 {
+      font-size: 20px;
+    }
+
+    .gallery-header .icon-action-button {
+      width: 30px;
+      min-height: 30px;
+    }
+
+    .gallery-header .icon-action-button svg {
+      width: 16px;
+      height: 16px;
+    }
   }
 
   .dictionary-gallery {
