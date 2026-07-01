@@ -1,35 +1,35 @@
-const STORAGE_KEY = "dictionary-example-trainer:v1";
-const SETTINGS_KEY = "dictionary-example-trainer:ai-settings";
+const STORAGE_KEY = "egtrainer:v1";
+const SETTINGS_KEY = "egtrainer:ai-settings";
 const DEFAULT_API_URL = "https://api.openai.com/v1/chat/completions";
 const CUSTOM_API_URL_MODE = "custom";
 const API_URL_OPTIONS = [
   { id: "openai", label: "OpenAI", url: DEFAULT_API_URL, defaultModel: "gpt-4o-mini" },
   { id: "deepseek", label: "DeepSeek", url: "https://api.deepseek.com/chat/completions", defaultModel: "deepseek-v4-flash" }
 ];
-const LAST_PUBLIC_DICTIONARY_KEY = "dictionary-example-trainer:last-public-dictionary";
+const LAST_PUBLIC_DICTIONARY_KEY = "egtrainer:last-public-dictionary";
 const MOBILE_NAV_MEDIA = "(max-width: 760px)";
 const PUBLIC_DICTIONARIES = [
-  { name: "A", title: "LLA Lexicon A", file: "dicts/LLA_LEXCION_A-dictionary.json", dictionaryId: "lla-lexcion-a", stats: { topics: 13, expressions: 641, examples: 951 } },
-  { name: "B", title: "LLA Lexicon B", file: "dicts/LLA_LEXCION_B-dictionary.json", dictionaryId: "lla-lexcion-b", stats: { topics: 33, expressions: 1250, examples: 1987 } },
-  { name: "C", title: "LLA Lexicon C", file: "dicts/LLA_LEXCION_C-dictionary.json", dictionaryId: "lla-lexcion-c", stats: { topics: 62, expressions: 2613, examples: 3851 } },
-  { name: "D", title: "LLA Lexicon D", file: "dicts/LLA_LEXCION_D-dictionary.json", dictionaryId: "lla-lexcion-d", stats: { topics: 27, expressions: 942, examples: 1441 } },
-  { name: "E", title: "LLA Lexicon E", file: "dicts/LLA_LEXCION_E-dictionary.json", dictionaryId: "lla-lexcion-e", stats: { topics: 14, expressions: 560, examples: 884 } },
-  { name: "F", title: "LLA Lexicon F", file: "dicts/LLA_LEXCION_F-dictionary.json", dictionaryId: "lla-lexcion-f", stats: { topics: 125, expressions: 6532, examples: 9959 } },
-  { name: "G", title: "LLA Lexicon G", file: "dicts/LLA_LEXCION_G-dictionary.json", dictionaryId: "lla-lexcion-g", stats: { topics: 131, expressions: 6641, examples: 9744 } },
-  { name: "H", title: "LLA Lexicon H", file: "dicts/LLA_LEXCION_H-dictionary.json", dictionaryId: "lla-lexcion-h", stats: { topics: 25, expressions: 873, examples: 1315 } },
-  { name: "I", title: "LLA Lexicon I", file: "dicts/LLA_LEXCION_I-dictionary.json", dictionaryId: "lla-lexcion-i", stats: { topics: 21, expressions: 1034, examples: 1530 } },
-  { name: "J", title: "LLA Lexicon J", file: "dicts/LLA_LEXCION_J-dictionary.json", dictionaryId: "lla-lexcion-j", stats: { topics: 55, expressions: 2794, examples: 4419 } },
-  { name: "K", title: "LLA Lexicon K", file: "dicts/LLA_LEXCION_K-dictionary.json", dictionaryId: "lla-lexcion-k", stats: { topics: 21, expressions: 709, examples: 1058 } },
-  { name: "L", title: "LLA Lexicon L", file: "dicts/LLA_LEXCION_L-dictionary.json", dictionaryId: "lla-lexcion-l", stats: { topics: 76, expressions: 3070, examples: 5331 } },
-  { name: "M", title: "LLA Lexicon M", file: "dicts/LLA_LEXCION_M-dictionary.json", dictionaryId: "lla-lexcion-m", stats: { topics: 78, expressions: 3681, examples: 5818 } },
-  { name: "N", title: "LLA Lexicon N", file: "dicts/LLA_LEXCION_N-dictionary.json", dictionaryId: "lla-lexcion-n", stats: { topics: 185, expressions: 8266, examples: 13057 } },
+  { name: "A", title: "LLA Lexicon A", file: "dicts/LLA_LEXICON_A-dictionary.json", dictionaryId: "lla-lexicon-a", stats: { topics: 13, expressions: 641, examples: 951 } },
+  { name: "B", title: "LLA Lexicon B", file: "dicts/LLA_LEXICON_B-dictionary.json", dictionaryId: "lla-lexicon-b", stats: { topics: 33, expressions: 1250, examples: 1987 } },
+  { name: "C", title: "LLA Lexicon C", file: "dicts/LLA_LEXICON_C-dictionary.json", dictionaryId: "lla-lexicon-c", stats: { topics: 62, expressions: 2613, examples: 3851 } },
+  { name: "D", title: "LLA Lexicon D", file: "dicts/LLA_LEXICON_D-dictionary.json", dictionaryId: "lla-lexicon-d", stats: { topics: 27, expressions: 942, examples: 1441 } },
+  { name: "E", title: "LLA Lexicon E", file: "dicts/LLA_LEXICON_E-dictionary.json", dictionaryId: "lla-lexicon-e", stats: { topics: 14, expressions: 560, examples: 884 } },
+  { name: "F", title: "LLA Lexicon F", file: "dicts/LLA_LEXICON_F-dictionary.json", dictionaryId: "lla-lexicon-f", stats: { topics: 125, expressions: 6532, examples: 9959 } },
+  { name: "G", title: "LLA Lexicon G", file: "dicts/LLA_LEXICON_G-dictionary.json", dictionaryId: "lla-lexicon-g", stats: { topics: 131, expressions: 6641, examples: 9744 } },
+  { name: "H", title: "LLA Lexicon H", file: "dicts/LLA_LEXICON_H-dictionary.json", dictionaryId: "lla-lexicon-h", stats: { topics: 25, expressions: 873, examples: 1315 } },
+  { name: "I", title: "LLA Lexicon I", file: "dicts/LLA_LEXICON_I-dictionary.json", dictionaryId: "lla-lexicon-i", stats: { topics: 21, expressions: 1034, examples: 1530 } },
+  { name: "J", title: "LLA Lexicon J", file: "dicts/LLA_LEXICON_J-dictionary.json", dictionaryId: "lla-lexicon-j", stats: { topics: 55, expressions: 2794, examples: 4419 } },
+  { name: "K", title: "LLA Lexicon K", file: "dicts/LLA_LEXICON_K-dictionary.json", dictionaryId: "lla-lexicon-k", stats: { topics: 21, expressions: 709, examples: 1058 } },
+  { name: "L", title: "LLA Lexicon L", file: "dicts/LLA_LEXICON_L-dictionary.json", dictionaryId: "lla-lexicon-l", stats: { topics: 76, expressions: 3070, examples: 5331 } },
+  { name: "M", title: "LLA Lexicon M", file: "dicts/LLA_LEXICON_M-dictionary.json", dictionaryId: "lla-lexicon-m", stats: { topics: 78, expressions: 3681, examples: 5818 } },
+  { name: "N", title: "LLA Lexicon N", file: "dicts/LLA_LEXICON_N-dictionary.json", dictionaryId: "lla-lexicon-n", stats: { topics: 185, expressions: 8266, examples: 13057 } },
   { name: "Collins C4", title: "Collins C4", file: "dicts/collins-c4-dictionary.json", dictionaryId: "collins-c4", stats: { topics: 8, expressions: 144, examples: 660 } }
 ];
 const PUBLIC_DICTIONARY_GROUPS = [
   {
     id: "lla-lexicon",
     name: "LLA Lexicon",
-    parts: PUBLIC_DICTIONARIES.filter(item => item.dictionaryId.startsWith("lla-lexcion-"))
+    parts: PUBLIC_DICTIONARIES.filter(item => item.dictionaryId.startsWith("lla-lexicon-"))
   },
   {
     id: "collins-c4",
@@ -612,7 +612,7 @@ function renderDictionaryPicker(message = "请在设置中选择词典 JSON 文�
   store = {};
   activeMarkable = null;
   resetStudySurface();
-  els.dictionaryName.textContent = "E-Trainer";
+  els.dictionaryName.textContent = "EgTrainer";
   els.progressLine.textContent = message;
   els.topicList.replaceChildren();
   els.loader.classList.remove("hidden");
@@ -816,7 +816,7 @@ function activateDictionary(nextDictionary, file) {
     throw new Error("词典中没有可学习的内容。");
   }
 
-  els.dictionaryName.textContent = file?.kind === "public" ? file.name : dictionary.name || file.name || "E-Trainer";
+  els.dictionaryName.textContent = file?.kind === "public" ? file.name : dictionary.name || file.name || "EgTrainer";
   currentFlatIndex = Number(localStorage.getItem(currentIndexKey()) || 0);
   if (!flatExamples[currentFlatIndex]) currentFlatIndex = 0;
   Object.keys(store).forEach(exampleId => getRecord(exampleId));
@@ -859,7 +859,7 @@ function showLoadError(message) {
   activeMarkable = null;
   resetStudySurface();
   els.dictionaryFileName.textContent = "尚未选择";
-  els.dictionaryName.textContent = "E-Trainer";
+  els.dictionaryName.textContent = "EgTrainer";
   els.progressLine.textContent = "词典读取失败";
   els.topicList.replaceChildren();
   els.loader.classList.remove("hidden");
