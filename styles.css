@@ -755,6 +755,10 @@ textarea {
   font-size: 13px;
 }
 
+.secondary-mark-toolbar {
+  display: none;
+}
+
 .markable-text {
   min-height: 58px;
   padding: 16px;
@@ -1415,6 +1419,15 @@ textarea {
   .input-actions .primary-button,
   .nav-actions .primary-button {
     order: -1;
+  }
+
+  .comparison.using-secondary-mark-toolbar .main-mark-toolbar {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .comparison.using-secondary-mark-toolbar .secondary-mark-toolbar {
+    display: flex;
   }
 
   .chinese-prompt,

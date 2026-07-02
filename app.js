@@ -8,6 +8,7 @@ const API_URL_OPTIONS = [
 ];
 const LAST_PUBLIC_DICTIONARY_KEY = "egtrainer:last-public-dictionary";
 const MOBILE_NAV_MEDIA = "(max-width: 760px)";
+const ENABLE_MOUSE_SELECTION_FALLBACK = new URLSearchParams(window.location.search).has("debugMouseSelection");
 const PUBLIC_DICTIONARIES = [
   { name: "A", title: "LLA Lexicon A", file: "dicts/LLA_LEXICON_A-dictionary.json", dictionaryId: "lla-lexicon-a", stats: { topics: 13, expressions: 641, examples: 951 } },
   { name: "B", title: "LLA Lexicon B", file: "dicts/LLA_LEXICON_B-dictionary.json", dictionaryId: "lla-lexicon-b", stats: { topics: 33, expressions: 1250, examples: 1987 } },
@@ -98,9 +99,14 @@ const els = {
   comparisonArea: document.getElementById("comparisonArea"),
   userTranslationView: document.getElementById("userTranslationView"),
   referenceView: document.getElementById("referenceView"),
+  mainMarkToolbar: document.getElementById("mainMarkToolbar"),
+  secondaryMarkToolbar: document.getElementById("secondaryMarkToolbar"),
   greenMarkBtn: document.getElementById("greenMarkBtn"),
   redMarkBtn: document.getElementById("redMarkBtn"),
   clearMarksBtn: document.getElementById("clearMarksBtn"),
+  secondaryGreenMarkBtn: document.getElementById("secondaryGreenMarkBtn"),
+  secondaryRedMarkBtn: document.getElementById("secondaryRedMarkBtn"),
+  secondaryClearMarksBtn: document.getElementById("secondaryClearMarksBtn"),
   aiResult: document.getElementById("aiResult"),
   runAiBtn: document.getElementById("runAiBtn"),
   addAiToNoteBtn: document.getElementById("addAiToNoteBtn"),
@@ -147,6 +153,7 @@ let topicExampleCounts = [];
 let currentFlatIndex = 0;
 let isComplete = false;
 let activeMarkable = null;
+let savedMarkSelection = null;
 let currentDictionaryStorageId = "";
 let store = loadStore();
 let settings = loadSettings();
@@ -835,6 +842,7 @@ function currentIndexKey() {
 }
 
 function resetStudySurface() {
+  resetMarkToolbarState();
   els.translationInput.value = "";
   els.userTranslationView.textContent = "";
   els.referenceView.textContent = "";
@@ -946,14 +954,34 @@ function wireEvents() {
     node.addEventListener("mouseup", () => {
       activeMarkable = node;
     });
+    node.addEventListener("touchstart", () => {
+      activeMarkable = node;
+    });
   }
 
-  for (const button of [els.greenMarkBtn, els.redMarkBtn, els.clearMarksBtn]) {
+  document.addEventListener("touchend", handleMobileMarkSelectionTouchEnd);
+  if (ENABLE_MOUSE_SELECTION_FALLBACK) {
+    document.addEventListener("mouseup", handleMobileMarkSelectionMouseUp);
+  }
+
+  const markButtons = [
+    els.greenMarkBtn,
+    els.redMarkBtn,
+    els.clearMarksBtn,
+    els.secondaryGreenMarkBtn,
+    els.secondaryRedMarkBtn,
+    els.secondaryClearMarksBtn
+  ];
+
+  for (const button of markButtons) {
     button.addEventListener("mousedown", event => event.preventDefault());
   }
   els.greenMarkBtn.addEventListener("click", () => applyMark("green"));
   els.redMarkBtn.addEventListener("click", () => applyMark("red"));
   els.clearMarksBtn.addEventListener("click", clearActiveMarks);
+  els.secondaryGreenMarkBtn.addEventListener("click", () => applyMark("green"));
+  els.secondaryRedMarkBtn.addEventListener("click", () => applyMark("red"));
+  els.secondaryClearMarksBtn.addEventListener("click", clearActiveMarks);
 
   els.settingsBtn.addEventListener("click", () => {
     hydrateSettingsForm();
@@ -1228,6 +1256,7 @@ function renderCurrent() {
   els.completePanel.classList.add("hidden");
   els.studyPanel.classList.remove("hidden");
   els.exitReviewBtn.classList.toggle("hidden", appMode !== "review");
+  resetMarkToolbarState();
 
   const { pos, topic, center, expression, example } = data;
   const hasExample = pos.type === "example";
@@ -1504,7 +1533,16 @@ function persistVisibleRecord() {
   saveStore();
 }
 
-function getSelectionMarkable() {
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_NAV_MEDIA).matches;
+}
+
+function resetMarkToolbarState() {
+  savedMarkSelection = null;
+  els.comparisonArea.classList.remove("using-secondary-mark-toolbar");
+}
+
+function getCurrentSelectionMarkable() {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
   const range = selection.getRangeAt(0);
@@ -1514,6 +1552,74 @@ function getSelectionMarkable() {
   const markable = node?.closest?.(".markable-text");
   if (!markable || !markable.contains(range.commonAncestorContainer)) return null;
   return { selection, range, markable };
+}
+
+function getSelectionMarkable() {
+  const selected = getCurrentSelectionMarkable();
+  if (selected) return selected;
+  if (!savedMarkSelection?.range || savedMarkSelection.range.collapsed) return null;
+  if (!savedMarkSelection.markable?.contains(savedMarkSelection.range.commonAncestorContainer)) return null;
+  return {
+    selection: null,
+    range: savedMarkSelection.range,
+    markable: savedMarkSelection.markable
+  };
+}
+
+function lineHeightForElement(element) {
+  const style = window.getComputedStyle(element);
+  const lineHeight = Number.parseFloat(style.lineHeight);
+  if (Number.isFinite(lineHeight)) return lineHeight;
+  const fontSize = Number.parseFloat(style.fontSize);
+  return Number.isFinite(fontSize) ? fontSize * 1.75 : 35;
+}
+
+function selectionIncludesFirstLine(range, markable) {
+  const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+  if (!rects.length) return false;
+
+  const markableRect = markable.getBoundingClientRect();
+  const style = window.getComputedStyle(markable);
+  const paddingTop = Number.parseFloat(style.paddingTop) || 0;
+  const firstLineTop = markableRect.top + paddingTop - 4;
+  const firstLineBottom = markableRect.top + paddingTop + lineHeightForElement(markable) * 1.25;
+
+  return rects.some(rect => rect.bottom > firstLineTop && rect.top < firstLineBottom);
+}
+
+function handleMobileMarkSelectionTouchEnd(event) {
+  if (!isMobileViewport()) return;
+  if (event.target instanceof Element && event.target.closest(".compare-toolbar")) return;
+  window.setTimeout(updateMobileMarkToolbarForSelection, 80);
+}
+
+function handleMobileMarkSelectionMouseUp(event) {
+  if (!isMobileViewport()) return;
+  if (event.target instanceof Element && event.target.closest(".compare-toolbar")) return;
+  window.setTimeout(updateMobileMarkToolbarForSelection, 0);
+}
+
+function updateMobileMarkToolbarForSelection() {
+  if (!isMobileViewport()) {
+    resetMarkToolbarState();
+    return;
+  }
+
+  const selected = getCurrentSelectionMarkable();
+  if (!selected) {
+    resetMarkToolbarState();
+    return;
+  }
+
+  activeMarkable = selected.markable;
+  savedMarkSelection = {
+    range: selected.range.cloneRange(),
+    markable: selected.markable
+  };
+
+  const useSecondaryToolbar = selected.markable === els.userTranslationView
+    && selectionIncludesFirstLine(selected.range, els.userTranslationView);
+  els.comparisonArea.classList.toggle("using-secondary-mark-toolbar", useSecondaryToolbar);
 }
 
 function applyMark(color) {
@@ -1535,8 +1641,10 @@ function applyMark(color) {
   }
 
   activeMarkable = selected.markable;
-  selected.selection.removeAllRanges();
+  selected.selection?.removeAllRanges();
+  window.getSelection()?.removeAllRanges();
   saveMarkableHtml(selected.markable);
+  resetMarkToolbarState();
 }
 
 function clearActiveMarks() {
@@ -1552,6 +1660,7 @@ function clearActiveMarks() {
   });
   target.normalize();
   saveMarkableHtml(target);
+  resetMarkToolbarState();
 }
 
 function saveMarkableHtml(markable) {
