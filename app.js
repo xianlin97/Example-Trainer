@@ -154,6 +154,8 @@ let currentFlatIndex = 0;
 let isComplete = false;
 let activeMarkable = null;
 let savedMarkSelection = null;
+let mobileMarkSelectionUpdateTimer = 0;
+let markToolbarInteractionUntil = 0;
 let currentDictionaryStorageId = "";
 let store = loadStore();
 let settings = loadSettings();
@@ -959,6 +961,7 @@ function wireEvents() {
     });
   }
 
+  document.addEventListener("selectionchange", handleMobileMarkSelectionChange);
   document.addEventListener("touchend", handleMobileMarkSelectionTouchEnd);
   if (ENABLE_MOUSE_SELECTION_FALLBACK) {
     document.addEventListener("mouseup", handleMobileMarkSelectionMouseUp);
@@ -974,6 +977,8 @@ function wireEvents() {
   ];
 
   for (const button of markButtons) {
+    button.addEventListener("pointerdown", noteMarkToolbarInteraction);
+    button.addEventListener("touchstart", noteMarkToolbarInteraction);
     button.addEventListener("mousedown", event => event.preventDefault());
   }
   els.greenMarkBtn.addEventListener("click", () => applyMark("green"));
@@ -1538,6 +1543,7 @@ function isMobileViewport() {
 }
 
 function resetMarkToolbarState() {
+  window.clearTimeout(mobileMarkSelectionUpdateTimer);
   savedMarkSelection = null;
   els.comparisonArea.classList.remove("using-secondary-mark-toolbar");
 }
@@ -1587,16 +1593,34 @@ function selectionIncludesFirstLine(range, markable) {
   return rects.some(rect => rect.bottom > firstLineTop && rect.top < firstLineBottom);
 }
 
+function noteMarkToolbarInteraction() {
+  markToolbarInteractionUntil = Date.now() + 700;
+}
+
+function isHandlingMarkToolbarInteraction() {
+  return Date.now() < markToolbarInteractionUntil;
+}
+
+function scheduleMobileMarkSelectionUpdate(delay = 120) {
+  if (!isMobileViewport()) return;
+  window.clearTimeout(mobileMarkSelectionUpdateTimer);
+  mobileMarkSelectionUpdateTimer = window.setTimeout(updateMobileMarkToolbarForSelection, delay);
+}
+
+function handleMobileMarkSelectionChange() {
+  scheduleMobileMarkSelectionUpdate(140);
+}
+
 function handleMobileMarkSelectionTouchEnd(event) {
   if (!isMobileViewport()) return;
   if (event.target instanceof Element && event.target.closest(".compare-toolbar")) return;
-  window.setTimeout(updateMobileMarkToolbarForSelection, 80);
+  scheduleMobileMarkSelectionUpdate(120);
 }
 
 function handleMobileMarkSelectionMouseUp(event) {
   if (!isMobileViewport()) return;
   if (event.target instanceof Element && event.target.closest(".compare-toolbar")) return;
-  window.setTimeout(updateMobileMarkToolbarForSelection, 0);
+  scheduleMobileMarkSelectionUpdate(0);
 }
 
 function updateMobileMarkToolbarForSelection() {
@@ -1607,6 +1631,7 @@ function updateMobileMarkToolbarForSelection() {
 
   const selected = getCurrentSelectionMarkable();
   if (!selected) {
+    if (isHandlingMarkToolbarInteraction()) return;
     resetMarkToolbarState();
     return;
   }
