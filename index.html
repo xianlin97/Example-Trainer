@@ -28,11 +28,6 @@
               <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"></path>
             </svg>
           </button>
-          <button class="icon-action-button gallery-soft-action" id="galleryFeedbackBtn" type="button" title="用户反馈" aria-label="用户反馈" data-tally-open="kdpXEo" data-tally-layout="modal" data-tally-hide-title="1" data-tally-auto-close="1000">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
-            </svg>
-          </button>
           <button class="icon-action-button" id="gallerySettingsBtn" type="button" title="设置" aria-label="设置">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"></path>
@@ -80,12 +75,18 @@
             <div class="progress-line" id="progressLine">请在设置中选择词典 JSON 文件</div>
           </div>
           <div class="top-actions">
-            <button class="icon-action-button subtle-icon-action" id="collapseTopbarBtn" type="button" title="隐藏顶部工具栏" aria-label="隐藏顶部工具栏">
+            <button class="icon-action-button subtle-icon-action hidden" id="exitReviewBtn" type="button" title="退出复习" aria-label="退出复习">
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m7 15 5-5 5 5"></path>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <path d="M16 17l5-5-5-5"></path>
+                <path d="M21 12H9"></path>
               </svg>
             </button>
-            <button class="secondary-button hidden" id="exitReviewBtn" type="button">退出复习</button>
+            <button class="icon-action-button subtle-icon-action" id="topbarFeedbackBtn" type="button" title="用户反馈" aria-label="用户反馈" data-tally-open="kdpXEo" data-tally-layout="modal" data-tally-hide-title="1" data-tally-auto-close="1000">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+              </svg>
+            </button>
             <button class="icon-action-button" id="settingsBtn" type="button" title="设置" aria-label="设置">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"></path>
@@ -100,6 +101,7 @@
               </svg>
             </button>
           </div>
+          <div class="topbar-collapse-hint">再次点击顶部可收起工具栏</div>
         </header>
 
         <div class="mobile-topic-control" id="mobileTopicControl">

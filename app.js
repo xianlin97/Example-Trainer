@@ -60,7 +60,6 @@ const els = {
   topbarInfo: document.querySelector(".topbar-info"),
   topActions: document.querySelector(".top-actions"),
   revealTopbarBtn: document.getElementById("revealTopbarBtn"),
-  collapseTopbarBtn: document.getElementById("collapseTopbarBtn"),
   topicRail: document.getElementById("topicRail"),
   collapseNavBtn: document.getElementById("collapseNavBtn"),
   expandNavBtn: document.getElementById("expandNavBtn"),
@@ -156,6 +155,7 @@ let reviewQueue = [];
 let reviewIndex = 0;
 let reviewSessionId = "";
 let studyFlatIndexBeforeReview = 0;
+let topbarHintTimer = 0;
 
 function practiceStoreKey(dictionaryStorageId = currentDictionaryStorageId) {
   return `${STORAGE_KEY}:practice:${dictionaryStorageId || "unselected"}`;
@@ -885,7 +885,6 @@ function wireEvents() {
   });
   els.backToGalleryBtn.addEventListener("click", () => showGallery(true));
   els.topbar.addEventListener("click", handleTopbarBlankClick);
-  els.collapseTopbarBtn.addEventListener("click", () => setTopbarCollapsed(true));
   els.revealTopbarBtn.addEventListener("click", () => setTopbarCollapsed(false));
   els.contextToggle.addEventListener("click", () => toggleContextStrip());
   els.closePartsBtn.addEventListener("click", () => els.partsDialog.close());
@@ -1022,16 +1021,22 @@ function handleMobileNavOutsidePointerDown(event) {
 }
 
 function setTopbarCollapsed(collapsed) {
+  window.clearTimeout(topbarHintTimer);
   els.studyMain.classList.toggle("topbar-collapsed", collapsed);
-  els.collapseTopbarBtn.setAttribute("aria-expanded", String(!collapsed));
+  els.studyMain.classList.toggle("show-topbar-collapse-hint", !collapsed);
   els.revealTopbarBtn.setAttribute("aria-expanded", String(!collapsed));
+  if (!collapsed) {
+    topbarHintTimer = window.setTimeout(() => {
+      els.studyMain.classList.remove("show-topbar-collapse-hint");
+    }, 5000);
+  }
 }
 
 function handleTopbarBlankClick(event) {
   if (els.studyMain.classList.contains("topbar-collapsed")) return;
   if (!(event.target instanceof Node)) return;
   if (event.target.closest("button, input, textarea, select, a")) return;
-  if (event.target === els.topbar || event.target === els.topbarInfo || event.target === els.topActions) {
+  if (els.topbar.contains(event.target)) {
     setTopbarCollapsed(true);
   }
 }

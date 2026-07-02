@@ -387,14 +387,16 @@ input:focus {
 }
 
 .topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 24px;
   margin-bottom: 34px;
 }
 
 .topbar-info {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   min-width: 0;
 }
 
@@ -444,6 +446,23 @@ input:focus {
   line-height: 1.5;
 }
 
+.topbar-collapse-hint {
+  display: none;
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  margin-top: 2px;
+  color: var(--grey-6);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.show-topbar-collapse-hint .topbar-collapse-hint {
+  display: block;
+}
+
 .top-actions,
 .input-actions,
 .record-actions,
@@ -455,6 +474,12 @@ input:focus {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.top-actions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
 }
 
 .study-panel {
@@ -1197,22 +1222,6 @@ textarea {
     height: 18px;
   }
 
-  @media (max-width: 360px) {
-    .gallery-header h1 {
-      font-size: 20px;
-    }
-
-    .gallery-header .icon-action-button {
-      width: 30px;
-      min-height: 30px;
-    }
-
-    .gallery-header .icon-action-button svg {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
   .dictionary-gallery {
     grid-template-columns: 1fr;
   }
@@ -1304,9 +1313,9 @@ textarea {
   }
 
   .topbar {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 0;
     margin-bottom: 8px;
   }
 
@@ -1333,7 +1342,11 @@ textarea {
   }
 
   .dictionary-title-button {
-    max-width: calc(100vw - 168px);
+    max-width: calc(100vw - 206px);
+  }
+
+  .topbar:has(#exitReviewBtn:not(.hidden)) .dictionary-title-button {
+    max-width: calc(100vw - 241px);
   }
 
   .app-shell.nav-collapsed .study-main:has(:is(.study-panel, .review-panel):not(.hidden)) .mobile-topic-control {
