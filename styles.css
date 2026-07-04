@@ -446,6 +446,75 @@ input:focus {
   line-height: 1.5;
 }
 
+.progress-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+}
+
+.progress-number-button,
+.progress-step-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  line-height: 1;
+}
+
+.progress-number-button {
+  min-width: 1.6em;
+  padding: 0 2px;
+  border-radius: 4px;
+  color: var(--color-blue);
+  font-weight: 600;
+}
+
+.progress-number-button:hover,
+.progress-number-button:focus-visible {
+  background: rgb(0 114 207 / 8%);
+}
+
+.progress-number-input {
+  width: 4.8em;
+  min-height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--grey-7);
+  background: white;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.progress-total {
+  margin-right: 2px;
+}
+
+.progress-step-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--grey-6);
+  font-size: 15px;
+}
+
+.progress-step-button:hover,
+.progress-step-button:focus-visible {
+  color: var(--color-blue);
+  background: rgb(0 114 207 / 8%);
+}
+
+.progress-step-button:disabled {
+  color: rgb(102 102 102 / 34%);
+  background: transparent;
+  cursor: default;
+}
+
 .topbar-collapse-hint {
   display: none;
   grid-column: 2;
@@ -488,7 +557,6 @@ input:focus {
 }
 
 .loader,
-.review-panel,
 .complete-panel {
   width: min(100%, 760px);
   margin: 12vh auto 0;
@@ -498,8 +566,77 @@ input:focus {
   background: white;
 }
 
+.review-panel {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 760px);
+  margin: 9vh auto 0;
+}
+
+.review-card {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+}
+
+.practice-heatmap-card {
+  text-align: center;
+}
+
+.practice-days-total {
+  font-family: var(--font-family-sans-serif);
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.practice-days-label {
+  margin-top: 6px;
+  color: var(--grey-6);
+  font-size: 13px;
+}
+
+.practice-heatmap {
+  display: grid;
+  grid-template-rows: repeat(7, 11px);
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 22px;
+  overflow: hidden;
+}
+
+.practice-heatmap-cell {
+  width: 11px;
+  height: 11px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: rgb(46 139 87 / 7%);
+}
+
+.practice-heatmap-cell[data-level="1"] {
+  background: rgb(46 139 87 / 22%);
+}
+
+.practice-heatmap-cell[data-level="2"] {
+  background: rgb(46 139 87 / 38%);
+}
+
+.practice-heatmap-cell[data-level="3"] {
+  background: rgb(46 139 87 / 58%);
+}
+
+.practice-heatmap-cell[data-level="4"] {
+  background: rgb(46 139 87 / 78%);
+}
+
+.practice-heatmap-cell.is-today {
+  border-color: var(--color-blue);
+}
+
 .loader-title,
-.review-panel h2,
+.review-card h2,
 .complete-panel h2 {
   margin: 0 0 8px;
   font-family: var(--font-family-sans-serif);
@@ -507,12 +644,10 @@ input:focus {
 }
 
 .loader-text,
-.review-panel p,
 .complete-panel p {
   color: var(--grey-6);
 }
 
-.review-presets,
 .review-start-row,
 .date-range-row {
   display: flex;
@@ -522,10 +657,40 @@ input:focus {
 }
 
 .review-presets {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 18px;
 }
 
+.review-preset-button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--grey-6);
+  background: rgb(46 139 87 / 5%);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.review-preset-button[aria-pressed="true"] {
+  border-color: rgb(46 139 87 / 34%);
+  color: var(--color-alt-green);
+  background: rgb(46 139 87 / 16%);
+  font-weight: 600;
+}
+
+.review-preset-button:hover,
+.review-preset-button:focus-visible {
+  color: var(--color-alt-green);
+  background: rgb(46 139 87 / 10%);
+}
+
 .date-range-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   margin-top: 16px;
 }
 
@@ -540,6 +705,7 @@ input:focus {
 }
 
 .date-range-row input {
+  width: 100%;
   min-height: 38px;
   padding: 0 10px;
   border: 1px solid var(--border);
@@ -1271,6 +1437,37 @@ textarea {
     width: 100%;
     max-width: 100vw;
     padding: 18px 14px 30px;
+  }
+
+  .review-panel {
+    margin-top: 7vh;
+    gap: 12px;
+  }
+
+  .review-card {
+    padding: 22px;
+  }
+
+  .review-preset-button {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .practice-days-total {
+    font-size: 48px;
+  }
+
+  .practice-heatmap {
+    grid-template-rows: repeat(7, 10px);
+    gap: 3px;
+    margin-top: 20px;
+  }
+
+  .practice-heatmap-cell {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
   }
 
   .topbar-collapsed .topbar-reveal {

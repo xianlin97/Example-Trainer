@@ -72,7 +72,17 @@
                 <path d="M7 10l5 5 5-5"></path>
               </svg>
             </button>
-            <div class="progress-line" id="progressLine">请在设置中选择词典 JSON 文件</div>
+            <div class="progress-line" id="progressLine">
+              <span class="progress-message" id="progressMessage">请在设置中选择词典 JSON 文件</span>
+              <span class="progress-control hidden" id="progressControl" aria-label="学习进度">
+                <span>进度</span>
+                <button class="progress-number-button" id="progressNumberBtn" type="button" title="输入进度跳转" aria-label="输入进度跳转">1</button>
+                <input class="progress-number-input hidden" id="progressNumberInput" type="number" min="1" inputmode="numeric" aria-label="跳转到进度" />
+                <span class="progress-total" id="progressTotalText">/ 1</span>
+                <button class="progress-step-button" id="progressPrevBtn" type="button" title="上一条" aria-label="上一条">‹</button>
+                <button class="progress-step-button" id="progressNextBtn" type="button" title="下一条" aria-label="下一条">›</button>
+              </span>
+            </div>
           </div>
           <div class="top-actions">
             <button class="icon-action-button subtle-icon-action hidden" id="exitReviewBtn" type="button" title="退出复习" aria-label="退出复习">
@@ -121,26 +131,34 @@
         <input class="hidden" id="dictionaryFileInput" type="file" accept=".json,application/json" />
 
         <section class="review-panel hidden" id="reviewPanel">
-          <h2>已练习</h2>
-          <p>选择一个日期范围，复习这段时间内已经提交过的练习项。复习会创建新的练习记录，不会覆盖原来的翻译、标注和笔记。</p>
-          <div class="review-presets">
-            <button class="secondary-button" id="reviewTodayBtn" type="button">今天</button>
-            <button class="secondary-button" id="review7Btn" type="button">最近 7 天</button>
-            <button class="secondary-button" id="review30Btn" type="button">最近 30 天</button>
+          <div class="review-card practice-heatmap-card">
+            <div class="practice-days-total" id="practiceDaysTotal">0</div>
+            <div class="practice-days-label">Practice Days</div>
+            <div class="practice-heatmap" id="practiceHeatmap" aria-label="Practice heatmap"></div>
           </div>
-          <div class="date-range-row">
-            <label>
-              <span>开始日期</span>
-              <input id="reviewStartDate" type="date" />
-            </label>
-            <label>
-              <span>结束日期</span>
-              <input id="reviewEndDate" type="date" />
-            </label>
-          </div>
-          <div class="review-start-row">
-            <div class="review-count" id="reviewCount">0 个练习项</div>
-            <button class="primary-button" id="startReviewBtn" type="button">开始复习</button>
+
+          <div class="review-card review-settings-card">
+            <h2>复习设置</h2>
+            <div class="review-presets">
+              <button class="review-preset-button" id="reviewTodayBtn" type="button" aria-pressed="false">今天</button>
+              <button class="review-preset-button" id="review7Btn" type="button" aria-pressed="false">近 7 天</button>
+              <button class="review-preset-button" id="review30Btn" type="button" aria-pressed="false">近 30 天</button>
+              <button class="review-preset-button" id="reviewCustomBtn" type="button" aria-pressed="false">自定义</button>
+            </div>
+            <div class="date-range-row hidden" id="reviewDateRangeRow">
+              <label>
+                <span>开始</span>
+                <input id="reviewStartDate" type="date" />
+              </label>
+              <label>
+                <span>结束</span>
+                <input id="reviewEndDate" type="date" />
+              </label>
+            </div>
+            <div class="review-start-row">
+              <div class="review-count" id="reviewCount">0 个练习项</div>
+              <button class="primary-button" id="startReviewBtn" type="button">开始复习</button>
+            </div>
           </div>
         </section>
 

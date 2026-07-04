@@ -69,14 +69,25 @@ const els = {
   topicList: document.getElementById("topicList"),
   dictionaryName: document.getElementById("dictionaryName"),
   progressLine: document.getElementById("progressLine"),
+  progressMessage: document.getElementById("progressMessage"),
+  progressControl: document.getElementById("progressControl"),
+  progressNumberBtn: document.getElementById("progressNumberBtn"),
+  progressNumberInput: document.getElementById("progressNumberInput"),
+  progressTotalText: document.getElementById("progressTotalText"),
+  progressPrevBtn: document.getElementById("progressPrevBtn"),
+  progressNextBtn: document.getElementById("progressNextBtn"),
   loader: document.getElementById("loader"),
   loaderHint: document.getElementById("loaderHint"),
   dictionaryFileInput: document.getElementById("dictionaryFileInput"),
   dictionaryFileName: document.getElementById("dictionaryFileName"),
   reviewPanel: document.getElementById("reviewPanel"),
+  practiceDaysTotal: document.getElementById("practiceDaysTotal"),
+  practiceHeatmap: document.getElementById("practiceHeatmap"),
   reviewTodayBtn: document.getElementById("reviewTodayBtn"),
   review7Btn: document.getElementById("review7Btn"),
   review30Btn: document.getElementById("review30Btn"),
+  reviewCustomBtn: document.getElementById("reviewCustomBtn"),
+  reviewDateRangeRow: document.getElementById("reviewDateRangeRow"),
   reviewStartDate: document.getElementById("reviewStartDate"),
   reviewEndDate: document.getElementById("reviewEndDate"),
   reviewCount: document.getElementById("reviewCount"),
@@ -164,6 +175,7 @@ let reviewQueue = [];
 let reviewIndex = 0;
 let reviewSessionId = "";
 let studyFlatIndexBeforeReview = 0;
+let reviewRangeMode = "7";
 let topbarHintTimer = 0;
 
 function practiceStoreKey(dictionaryStorageId = currentDictionaryStorageId) {
@@ -625,7 +637,7 @@ function renderDictionaryPicker(message = "请在设置中选择词典 JSON 文�
   activeMarkable = null;
   resetStudySurface();
   els.dictionaryName.textContent = "EgTrainer";
-  els.progressLine.textContent = message;
+  setProgressMessage(message);
   els.topicList.replaceChildren();
   els.loader.classList.remove("hidden");
   els.reviewPanel.classList.add("hidden");
@@ -873,7 +885,7 @@ function showLoadError(message) {
   resetStudySurface();
   els.dictionaryFileName.textContent = "尚未选择";
   els.dictionaryName.textContent = "EgTrainer";
-  els.progressLine.textContent = "词典读取失败";
+  setProgressMessage("词典读取失败");
   els.topicList.replaceChildren();
   els.loader.classList.remove("hidden");
   els.reviewPanel.classList.add("hidden");
@@ -896,6 +908,11 @@ function wireEvents() {
   els.backToGalleryBtn.addEventListener("click", () => showGallery(true));
   els.topbar.addEventListener("click", handleTopbarBlankClick);
   els.revealTopbarBtn.addEventListener("click", () => setTopbarCollapsed(false));
+  els.progressNumberBtn.addEventListener("click", startProgressInput);
+  els.progressNumberInput.addEventListener("keydown", handleProgressInputKeydown);
+  els.progressNumberInput.addEventListener("blur", commitProgressInput);
+  els.progressPrevBtn.addEventListener("click", goPrevious);
+  els.progressNextBtn.addEventListener("click", goNext);
   els.contextToggle.addEventListener("click", () => toggleContextStrip());
   els.closePartsBtn.addEventListener("click", () => els.partsDialog.close());
   els.collapseNavBtn.addEventListener("click", () => {
@@ -916,8 +933,9 @@ function wireEvents() {
   els.reviewTodayBtn.addEventListener("click", () => setReviewRangePreset(1));
   els.review7Btn.addEventListener("click", () => setReviewRangePreset(7));
   els.review30Btn.addEventListener("click", () => setReviewRangePreset(30));
-  els.reviewStartDate.addEventListener("change", updateReviewCount);
-  els.reviewEndDate.addEventListener("change", updateReviewCount);
+  els.reviewCustomBtn.addEventListener("click", setCustomReviewRange);
+  els.reviewStartDate.addEventListener("change", handleReviewDateChange);
+  els.reviewEndDate.addEventListener("change", handleReviewDateChange);
   els.startReviewBtn.addEventListener("click", startReviewMode);
   els.dictionaryFileInput.addEventListener("change", loadSelectedFile);
 
@@ -1068,10 +1086,98 @@ function setTopbarCollapsed(collapsed) {
 function handleTopbarBlankClick(event) {
   if (els.studyMain.classList.contains("topbar-collapsed")) return;
   if (!(event.target instanceof Node)) return;
-  if (event.target.closest("button, input, textarea, select, a")) return;
+  if (event.target instanceof Element && event.target.closest(".progress-control")) return;
+  if (event.target instanceof Element && event.target.closest("button, input, textarea, select, a")) return;
   if (els.topbar.contains(event.target)) {
     setTopbarCollapsed(true);
   }
+}
+
+function setProgressMessage(message) {
+  els.progressMessage.textContent = message;
+  els.progressMessage.classList.remove("hidden");
+  els.progressControl.classList.add("hidden");
+  els.progressNumberInput.classList.add("hidden");
+  els.progressNumberBtn.classList.remove("hidden");
+}
+
+function renderStudyProgress() {
+  const total = flatExamples.length;
+  if (!total) {
+    setProgressMessage("请在设置中选择词典 JSON 文件");
+    return;
+  }
+
+  const current = currentFlatIndex + 1;
+  els.progressMessage.classList.add("hidden");
+  els.progressControl.classList.remove("hidden");
+  els.progressNumberInput.classList.add("hidden");
+  els.progressNumberBtn.classList.remove("hidden");
+  els.progressNumberBtn.textContent = String(current);
+  els.progressNumberInput.value = String(current);
+  els.progressNumberInput.max = String(total);
+  els.progressTotalText.textContent = `/ ${total}`;
+  els.progressPrevBtn.disabled = currentFlatIndex <= 0;
+  els.progressNextBtn.disabled = currentFlatIndex >= total - 1;
+}
+
+function startProgressInput() {
+  if (appMode !== "study" || !flatExamples.length) return;
+  els.progressNumberInput.value = String(currentFlatIndex + 1);
+  els.progressNumberInput.max = String(flatExamples.length);
+  els.progressNumberBtn.classList.add("hidden");
+  els.progressNumberInput.classList.remove("hidden");
+  els.progressNumberInput.focus();
+  els.progressNumberInput.select();
+}
+
+function finishProgressInput() {
+  els.progressNumberInput.classList.add("hidden");
+  els.progressNumberBtn.classList.remove("hidden");
+}
+
+function commitProgressInput() {
+  if (els.progressNumberInput.classList.contains("hidden")) return;
+  const parsed = Number.parseInt(els.progressNumberInput.value, 10);
+  finishProgressInput();
+
+  if (!Number.isFinite(parsed)) {
+    renderStudyProgress();
+    return;
+  }
+
+  jumpToFlatIndex(parsed - 1);
+}
+
+function handleProgressInputKeydown(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    commitProgressInput();
+    return;
+  }
+  if (event.key === "Escape") {
+    event.preventDefault();
+    finishProgressInput();
+    renderStudyProgress();
+  }
+}
+
+function jumpToFlatIndex(index) {
+  if (!flatExamples.length) return;
+  const nextIndex = Math.min(Math.max(Number(index) || 0, 0), flatExamples.length - 1);
+  persistVisibleRecord();
+  appMode = "study";
+  reviewQueue = [];
+  reviewIndex = 0;
+  reviewSessionId = "";
+  currentFlatIndex = nextIndex;
+  isComplete = false;
+  renderCurrent();
+}
+
+function goPrevious() {
+  if (appMode !== "study" || currentFlatIndex <= 0) return;
+  jumpToFlatIndex(currentFlatIndex - 1);
 }
 
 function setDefaultStudyChromeCollapsed() {
@@ -1161,11 +1267,104 @@ function addDays(date, days) {
   return next;
 }
 
+function parseLocalDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+  if (!match) return null;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+function startOfWeek(date) {
+  const start = new Date(date);
+  const day = (start.getDay() + 6) % 7;
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - day);
+  return start;
+}
+
+function collectPracticeDayCounts() {
+  const counts = new Map();
+  Object.values(store).forEach(rawRecord => {
+    if (!rawRecord || typeof rawRecord !== "object") return;
+    const record = migrateRecord(rawRecord);
+    getSubmittedAttempts(record).forEach(attempt => {
+      if (!parseLocalDate(attempt.practiceDate)) return;
+      counts.set(attempt.practiceDate, (counts.get(attempt.practiceDate) || 0) + 1);
+    });
+  });
+  return counts;
+}
+
+function heatmapLevel(count) {
+  if (count <= 0) return 0;
+  if (count === 1) return 1;
+  if (count <= 3) return 2;
+  if (count <= 6) return 3;
+  return 4;
+}
+
+function renderPracticeHeatmap() {
+  const dayCounts = collectPracticeDayCounts();
+  const dates = Array.from(dayCounts.keys()).sort();
+  const today = new Date();
+  const todayString = localDateString(today);
+  const latestStart = startOfWeek(addDays(today, -7 * 15));
+  const firstPracticeDate = parseLocalDate(dates[0]);
+  const firstPracticeWeek = firstPracticeDate ? startOfWeek(firstPracticeDate) : latestStart;
+  const start = firstPracticeWeek > latestStart ? firstPracticeWeek : latestStart;
+  const end = addDays(startOfWeek(today), 6);
+  const fragment = document.createDocumentFragment();
+
+  for (let date = new Date(start); date <= end; date = addDays(date, 1)) {
+    const dateString = localDateString(date);
+    const count = dayCounts.get(dateString) || 0;
+    const cell = document.createElement("span");
+    cell.className = `practice-heatmap-cell${dateString === todayString ? " is-today" : ""}`;
+    cell.dataset.level = String(heatmapLevel(count));
+    cell.title = count ? `${dateString}: ${count}` : dateString;
+    fragment.appendChild(cell);
+  }
+
+  els.practiceDaysTotal.textContent = String(dayCounts.size);
+  els.practiceHeatmap.replaceChildren(fragment);
+}
+
+function setReviewRangeMode(mode) {
+  reviewRangeMode = mode;
+  const buttons = [
+    [els.reviewTodayBtn, "1"],
+    [els.review7Btn, "7"],
+    [els.review30Btn, "30"],
+    [els.reviewCustomBtn, "custom"]
+  ];
+
+  buttons.forEach(([button, buttonMode]) => {
+    button.setAttribute("aria-pressed", String(buttonMode === mode));
+  });
+  els.reviewDateRangeRow.classList.toggle("hidden", mode !== "custom");
+}
+
 function setReviewRangePreset(days) {
   const end = new Date();
   const start = addDays(end, -(days - 1));
   els.reviewStartDate.value = localDateString(start);
   els.reviewEndDate.value = localDateString(end);
+  setReviewRangeMode(String(days));
+  updateReviewCount();
+}
+
+function setCustomReviewRange() {
+  if (!els.reviewStartDate.value || !els.reviewEndDate.value) {
+    const end = new Date();
+    const start = addDays(end, -6);
+    els.reviewStartDate.value = localDateString(start);
+    els.reviewEndDate.value = localDateString(end);
+  }
+  setReviewRangeMode("custom");
+  updateReviewCount();
+}
+
+function handleReviewDateChange() {
+  setReviewRangeMode("custom");
   updateReviewCount();
 }
 
@@ -1214,12 +1413,13 @@ function showReviewSetup() {
   els.completePanel.classList.add("hidden");
   els.reviewPanel.classList.remove("hidden");
   els.exitReviewBtn.classList.add("hidden");
+  renderPracticeHeatmap();
   if (!els.reviewStartDate.value || !els.reviewEndDate.value) {
     setReviewRangePreset(7);
   } else {
     updateReviewCount();
   }
-  els.progressLine.textContent = "已练习 · 选择复习日期范围";
+  setProgressMessage("已练习 · 复习设置");
   renderTopicList();
 }
 
@@ -1280,10 +1480,11 @@ function renderCurrent() {
   els.submitBtn.textContent = hasExample ? "提交" : "继续";
   els.skipExpressionBtn.classList.toggle("hidden", !hasExample);
 
-  const total = flatExamples.length;
-  els.progressLine.textContent = appMode === "review"
-    ? `复习 · ${reviewIndex + 1} / ${reviewQueue.length}`
-    : `进度 ${currentFlatIndex + 1} / ${total}`;
+  if (appMode === "review") {
+    setProgressMessage(`复习 · ${reviewIndex + 1} / ${reviewQueue.length}`);
+  } else {
+    renderStudyProgress();
+  }
 
   if (hasExample && attempt.submitted) {
     showComparison(record, attempt, example);
@@ -1423,8 +1624,34 @@ function submitTranslation() {
   }
 }
 
+function collapseMobileNavAfterTopicSelection() {
+  if (window.matchMedia(MOBILE_NAV_MEDIA).matches) {
+    setNavCollapsed(true);
+  }
+}
+
+function topicResumeFlatIndex(topicIndex) {
+  let lastSubmittedIndex = -1;
+  flatExamples.forEach((pos, index) => {
+    if (pos.topicIndex !== topicIndex) return;
+    const record = getExistingRecord(pos.exampleId);
+    if (record && hasSubmittedAttempt(record)) {
+      lastSubmittedIndex = index;
+    }
+  });
+  return lastSubmittedIndex === -1 ? topicFirstFlatIndex[topicIndex] : lastSubmittedIndex;
+}
+
 function startTopic(topicIndex) {
-  const nextIndex = topicFirstFlatIndex[topicIndex];
+  const firstIndex = topicFirstFlatIndex[topicIndex];
+  if (firstIndex === -1) return;
+
+  if (appMode === "study" && !isComplete && currentPosition()?.topicIndex === topicIndex) {
+    collapseMobileNavAfterTopicSelection();
+    return;
+  }
+
+  const nextIndex = topicResumeFlatIndex(topicIndex);
   if (nextIndex === -1) return;
   persistVisibleRecord();
   appMode = "study";
@@ -1433,6 +1660,7 @@ function startTopic(topicIndex) {
   reviewSessionId = "";
   currentFlatIndex = nextIndex;
   renderCurrent();
+  collapseMobileNavAfterTopicSelection();
 }
 
 function goNext() {
@@ -1499,7 +1727,7 @@ function renderComplete() {
   els.exitReviewBtn.classList.add("hidden");
   els.completeTitle.textContent = "已完成当前词典学习";
   els.completeText.textContent = "可以导出已提交练习的高亮翻译和学习笔记，或回到第一个 Topic 重新开始。";
-  els.progressLine.textContent = "已完成当前词典学习";
+  setProgressMessage("已完成当前词典学习");
   localStorage.setItem(currentIndexKey(), String(Math.max(0, flatExamples.length - 1)));
   renderTopicList();
 }
@@ -1513,7 +1741,7 @@ function renderReviewComplete() {
   els.exitReviewBtn.classList.remove("hidden");
   els.completeTitle.textContent = "已完成本次复习";
   els.completeText.textContent = "可以导出本次复习记录，或退出复习回到普通学习位置。";
-  els.progressLine.textContent = "复习完成";
+  setProgressMessage("复习完成");
   renderTopicList();
 }
 
